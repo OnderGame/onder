@@ -1,0 +1,3 @@
+[submodule "thirdparty/pixeltoaster"]
+	path = thirdparty/pixeltoaster
+	url = https://github.com/thedmd/pixeltoaster

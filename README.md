@@ -18,6 +18,19 @@ Yet another rogue-like 2D sandbox game
 - Play with friends, of course :) (multiplayer)
 - Extensible! Gamers *love* mods.
 
+## Building
+
+```
+git clone <repo> --recursive
+cmake -S . -B build
+make -C build
+```
+
+alternatively, to build and run directly:
+```
+./run.sh
+```
+
 ## Architecture
 
 We need to finish fast, so focus on keeping it simple and debuggable.
@@ -124,5 +137,7 @@ ChunkMap<List<Bullet>> bullets;
 - `db` for persistent data (saves).
 - `net` for multiplayer functions.
 - more?
+
+Headers file are in `include/` and end with `.hpp` for C++.
 
 OS-specific code is put in `unix/`, `linux/`, `windows/` ... as appropriate
