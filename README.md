@@ -138,4 +138,6 @@ ChunkMap<List<Bullet>> bullets;
 - `net` for multiplayer functions.
 - more?
 
+Headers file are in `include/` and end with `.hpp` for C++.
+
 OS-specific code is put in `unix/`, `linux/`, `windows/` ... as appropriate
