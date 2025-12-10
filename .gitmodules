@@ -1,3 +1,6 @@
 [submodule "thirdparty/pixeltoaster"]
 	path = thirdparty/pixeltoaster
 	url = https://github.com/thedmd/pixeltoaster
+[submodule "thirdparty/lodepng"]
+	path = thirdparty/lodepng
+	url = https://github.com/lvandeve/lodepng

@@ -7,8 +7,9 @@ option(ENABLE_EXAMPLES   "Enable examples." NO)
 option(PIXELTOASTER_NO_STL "Disable use of STL library." YES)
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
+include_directories(${PROJECT_SOURCE_DIR}/thirdparty/lodepng)
 include_directories(${PROJECT_SOURCE_DIR}/thirdparty/pixeltoaster)
 add_subdirectory(${PROJECT_SOURCE_DIR}/thirdparty/pixeltoaster)
 
-add_executable(Onder src/main.cpp)
+add_executable(Onder src/main.cpp src/filesystem.cpp src/graphics.cpp thirdparty/lodepng/lodepng.cpp)
 target_link_libraries(Onder PixelToaster)

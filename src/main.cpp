@@ -1,24 +1,24 @@
 #include <cstddef>
+#include <onder/filesystem.hpp>
 #include <onder/graphics.hpp>
+#include <onder/world.hpp>
+#include <stdio.h>
 
 int main(int argc, char **argv)
 {
 	onder::graphics::Window display("Hello framebuffer!", 480, 320);
+	onder::world::World world;
 
-	onder::graphics::Pixel pixels[320 * 480];
-
-	for (size_t y = 0; y < 320; y++) {
-		for (size_t x = 0; x < 480; x++) {
-			auto &p = pixels[y * 480 + x];
-			p.r = x * 255 / 480;
-			p.g = y * 255 / 320;
-			p.b = (511 - p.r - p.g) / 2;
-			p.a = 255;
-		}
-	}
+	onder::filesystem::FileMmap png("assets/tiles/stone.png");
+	auto img = onder::graphics::Image::from_png(png.slice());
+	display.draw(0, 0, img);
+	display.draw(64, 64, img);
+	display.draw(128, 128, img);
+	display.draw(128, 192, img);
+	display.draw(192, 192, img);
 
 	while (display.is_open()) {
-		display.update(pixels);
+		display.update();
 	}
 
 	return 0;
