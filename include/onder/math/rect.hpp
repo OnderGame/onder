@@ -38,6 +38,21 @@ public:
 	operator Rect<U>() {
 		return { lo, hi };
 	}
+
+	Rect<T> operator&(const Rect<T> &other) {
+		auto l = lo.max(other.lo), h = hi.min(other.hi);
+		return { l.min(h), h };
+	}
+	Rect<T> &operator&=(const Rect<T> &other) {
+		return *this = *this & other;
+	}
+
+	Rect<T> operator-(const Vec2<T> &translation) {
+		return { lo - translation, hi - translation };
+	}
+	Rect<T> operator+(const Vec2<T> &translation) {
+		return { lo + translation, hi + translation };
+	}
 };
 
 template<typename T>
