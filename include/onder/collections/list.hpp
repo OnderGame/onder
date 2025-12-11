@@ -45,6 +45,13 @@ public:
 		++m_len;
 	}
 
+	void append(const T *values, size_t num) {
+		reserve(num);
+		const T *end = values + num;
+		while (values < end)
+			push(*values++);
+	}
+
 	T pop() {
 		if (m_len == 0)
 			throw std::exception();
