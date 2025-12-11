@@ -62,8 +62,8 @@ void Poller::add(const IPollable &track) {
 	fds.push(fd);
 }
 
-size_t Poller::poll(std::time_t timeout) {
-	return ::poll(fds.ptr(), (::nfds_t)fds.len(), (int)timeout);
+size_t Poller::poll(int timeout_ms) {
+	return ::poll(fds.ptr(), (::nfds_t)fds.len(), timeout_ms);
 }
 
 std::ostream &operator<<(std::ostream &out, const Ip4 &value) {

@@ -60,7 +60,7 @@ class Poller {
 public:
 	Poller();
 	void add(const IPollable &track);
-	size_t poll(std::time_t timeout);
+	size_t poll(int timeout_ms);
 };
 
 std::ostream &operator<<(std::ostream &out, const Ip4 &value);
