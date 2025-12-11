@@ -1,6 +1,7 @@
 #pragma once
 
 #include <numeric>
+#include <onder/collections/slice.hpp>
 
 namespace onder {
 namespace collections {
@@ -20,11 +21,6 @@ class List {
 		delete[] base;
 		base = newbase;
 		capacity = total;
-	}
-
-	void check_bounds(size_t index) const {
-		if (index >= len)
-			throw std::exception(); // TODO
 	}
 
 public:
@@ -55,14 +51,24 @@ public:
 		return base[--len];
 	}
 
+	void clear() {
+		len = 0;
+	}
+
+	operator Slice<const T>() const {
+		return { base, len };
+	}
+
+	operator Slice<T>() {
+		return { base, len };
+	}
+
 	const T &operator[](size_t index) const {
-		check_bounds(index);
-		return base[index];
+		return ((Slice<const T>)*this)[index];
 	}
 
 	T &operator[](size_t index) {
-		check_bounds(index);
-		return base[index];
+		return ((Slice<T>)*this)[index];
 	}
 };
 

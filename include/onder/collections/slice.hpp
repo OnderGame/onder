@@ -18,6 +18,39 @@ class Slice {
 	}
 
 public:
+	// https://stackoverflow.com/a/38103394
+	class iterator {
+		T *cur, *start, *end;
+
+		friend class Slice;
+
+		iterator(T *cur, T *start, T *end) : cur(cur), start(start), end(end) {}
+
+	public:
+		iterator& operator++() {
+			++cur;
+			return *this;
+		}
+        iterator operator++(int) {
+			iterator ret = *this;
+			++(*this);
+			return ret;
+		}
+        bool operator==(iterator other) const {
+			return cur == other.cur;
+		}
+        bool operator!=(iterator other) const {
+			return !(*this == other);
+		}
+		T &operator*() {
+			return *cur;
+		}
+        // iterator traits
+        using value_type = T;
+        using pointer = T *;
+        using reference = T &;
+	};
+
 	Slice() : base(nullptr), m_len(0) {}
 	Slice(T *base, size_t len) : base(base), m_len(len) {}
 
@@ -37,6 +70,14 @@ public:
 
 	size_t len() const {
 		return m_len;
+	}
+
+	iterator begin() const {
+		return { base, base, base + m_len };
+	}
+
+	iterator end() const {
+		return { base + m_len, base, base + m_len };
 	}
 };
 
