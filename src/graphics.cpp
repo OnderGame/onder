@@ -31,6 +31,10 @@ void Image::copy_from(uint16_t x, uint16_t y, const Image &src) {
 	}
 }
 
+void Window::clear(Pixel value) {
+	buffer.fill(value);
+}
+
 void Window::draw(uint16_t x, uint16_t y, const Image &img) {
 	buffer.copy_from(x, y, img);
 }

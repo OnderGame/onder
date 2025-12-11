@@ -100,6 +100,7 @@ public:
 	}
 
 	void draw(uint16_t x, uint16_t y, const Image &img);
+	void clear(Pixel value);
 };
 
 class Render {
