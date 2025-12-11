@@ -49,17 +49,21 @@ World::World(size_t depth)
 	: layers(depth, {})
 {}
 
-TileId &World::operator[](uint8_t depth, uint32_t x, uint32_t y) {
+Chunk &World::chunk(uint8_t depth, uint32_t cx, uint32_t cy) {
 	auto f = [](auto v, auto i) { return (v >> (i * CHUNK_DIM_P2)) % CHUNK_DIM; };
 	ChunkRef *ref = &layers[depth].ref;
-	for (uint8_t i = CHUNK_TRIE_DEPTH; i > 0; i--) {
+	for (uint8_t i = CHUNK_TRIE_DEPTH; i > 0;) {
+		i--;
 		ChunkSlot &cur = chunks.get_or_alloc(*ref);
-		auto px = f(x, i), py = f(y, i);
+		auto px = f(cx, i), py = f(cy, i);
 		ref = &cur.parent.tiles[py][px];
 	}
-	ChunkSlot &cur = chunks.get_or_alloc(*ref);
-	auto px = f(x, 0), py = f(y, 0);
-	return cur.leaf.tiles[py][px];
+	return chunks.get_or_alloc(*ref).leaf;
+}
+
+TileId &World::operator[](uint8_t depth, uint32_t x, uint32_t y) {
+	Chunk &c = chunk(depth, x / CHUNK_DIM, y / CHUNK_DIM);
+	return c.tiles[y % CHUNK_DIM][x % CHUNK_DIM];
 }
 
 }

@@ -102,6 +102,8 @@ class World {
 public:
 	World(size_t depth);
 
+	Chunk &chunk(uint8_t depth, uint32_t cx, uint32_t cy);
+
 	TileId &operator[](uint8_t depth, uint32_t x, uint32_t y);
 };
 
