@@ -17,6 +17,8 @@ class Array {
 	}
 
 public:
+	using iterator = typename Slice<T>::iterator;
+
 	Array() : values({}) {}
 
 	const T &operator[](size_t index) const {
@@ -29,8 +31,16 @@ public:
 		return values[index];
 	}
 
-	Slice<T> slice() {
-		return { values, N };
+	operator Slice<T>() const {
+		return { (T *)values, N };
+	}
+
+	iterator begin() const {
+		return ((Slice<T>)*this).begin();
+	}
+
+	iterator end() const {
+		return ((Slice<T>)*this).end();
 	}
 };
 
