@@ -44,7 +44,7 @@ struct Vec2 {
 	}
 
 	template<typename U>
-	operator Vec2<U>() {
+	operator Vec2<U>() const {
 		return { (U)x, (U)y };
 	}
 };
