@@ -13,12 +13,15 @@ int main(int argc, char **argv)
 
 	const size_t W = 36;
 
-	Window display("Hello framebuffer!", 64 * W, 640);
+	Window display("Hello framebuffer!", 64 * W, 768);
 	World world(256);
 
 	Array<Image, 4> tiles;
 
 	FileMmap png("assets/tiles/stone.png");
+
+	InputListener inputs;
+	display.set_listener(inputs);
 
 	tiles[0] = Image::filled(64, 64, { 127, 127, 127, 127 });
 	tiles[1] = Image::from_png(png.slice());
@@ -31,23 +34,35 @@ int main(int argc, char **argv)
 		}
 	}
 
-	world[0, 0, 0].id = 1;
-	world[0, 1, 0].id = 2;
-	world[0, 1, 1].id = 3;
 	world[0, 2, 2].id = 1;
-	world[0, 3, 2].id = 1;
-	world[0, 4, 2].id = 1;
-	world[0, 34, 5].id = 1;
+	world[0, 3, 2].id = 2;
+	world[0, 3, 3].id = 3;
+	world[0, 4, 4].id = 1;
+	world[0, 5, 4].id = 1;
+	world[0, 6, 4].id = 1;
+	world[0, 36, 7].id = 1;
 
-	for (uint32_t x = 0; x < W; x++) {
-		for (uint32_t y = 0; y < 10; y++) {
-			const auto &img = tiles[world[0, x, y].id];
-			display.draw(x*64, y*64, img);
-		}
-	}
+	int x = 0, y = 0;
 
 	while (display.is_open()) {
+		display.clear({ 0, 0, 0, 0 });
+		for (uint32_t dx = 2; dx < W - 2; dx++) {
+			for (uint32_t dy = 2; dy < 10; dy++) {
+				const auto &img = tiles[world[0, dx, dy].id];
+				display.draw(x+dx*64, y+dy*64, img);
+			}
+		}
 		display.update();
+		for (const auto evt : inputs.events()) {
+			switch (evt.key.code) {
+			case 'Q': --x; break;
+			case 'D': ++x; break;
+			case 'Z': --y; break;
+			case 'S': ++y; break;
+			default: break;
+			}
+		}
+		inputs.clear_events();
 	}
 
 	return 0;
