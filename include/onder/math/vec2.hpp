@@ -9,7 +9,7 @@ template<typename T>
 struct Vec2 {
 	T x, y;
 
-	Vec2() : x({}), y({}) {}
+	Vec2() : x(), y() {}
 	Vec2(T x, T y) : x(x), y(y) {}
 
 	static Vec2<T> splat(T value) {
