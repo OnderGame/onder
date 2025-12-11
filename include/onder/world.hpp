@@ -11,6 +11,10 @@ struct TileId {
 	uint32_t id;
 
 	TileId() : id(0) {}
+
+	bool is_valid() const {
+		return id != (uint32_t)-1;
+	}
 };
 
 // 2**5 * 2**5 * 4 = 2**10 * 4 = 4096 = one page
