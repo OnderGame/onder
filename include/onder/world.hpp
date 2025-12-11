@@ -34,7 +34,7 @@ template<typename T>
 using ChunkGrid = collections::Array<collections::Array<T, CHUNK_DIM>, CHUNK_DIM>;
 
 struct Chunk {
-	 ChunkGrid<TileId> tiles; // 2**5
+	ChunkGrid<TileId> tiles; // 2**5
 };
 
 struct ChunkRef {
