@@ -1,6 +1,7 @@
 #include <cstddef>
 #include <onder/filesystem.hpp>
 #include <onder/graphics.hpp>
+#include <onder/net.hpp>
 #include <onder/world.hpp>
 #include <iostream>
 
@@ -11,6 +12,7 @@ int main(int argc, char **argv)
 	using namespace onder::world;
 	using namespace onder::filesystem;
 	using namespace onder::math;
+	using namespace onder::net;
 
 	const Vec2 DIM(36, 12);
 
@@ -23,6 +25,12 @@ int main(int argc, char **argv)
 
 	InputListener inputs;
 	display.set_listener(inputs);
+
+	Udp<Ip4> server({ {}, 3333 });
+	List<uint8_t> recvbuffer;
+
+	Poller poller;
+	poller.add(server);
 
 	tiles[0] = Image::filled({ 64, 64 }, { 127, 127, 127, 127 });
 	tiles[1] = Image::from_png(png.slice());
@@ -71,6 +79,13 @@ int main(int argc, char **argv)
 			}
 		}
 		inputs.clear_events();
+		recvbuffer.reserve(1024);
+		SocketAddr<Ip4> addr;
+		if (poller.poll(0) > 0) {
+			if (server.recv(recvbuffer, addr) < 0)
+				throw std::exception();
+			(std::cout << addr << " -> ").write((char *)recvbuffer.ptr(), recvbuffer.len()) << std::endl;
+		}
 	}
 
 	return 0;
