@@ -52,6 +52,16 @@ int Udp<Ip4>::recv(collections::List<uint8_t> &buffer, SocketAddr<Ip4> &address)
 	return 0;
 }
 
+template<>
+int Udp<Ip4>::send(collections::Slice<const uint8_t> data, const SocketAddr<Ip4> &address) {
+	struct sockaddr_in addr;
+	addr.sin_family = AF_INET;
+	addr.sin_addr.s_addr = ::htonl(address.addr.addr);
+	addr.sin_port = ::htons(address.port);
+	ssize_t res = ::sendto(m_fd, (void *)data.ptr(), data.len(), MSG_NOSIGNAL, (struct sockaddr *)&addr, sizeof(addr));
+	return res < 0 ? -1 : 0;
+}
+
 Poller::Poller() {}
 
 void Poller::add(const IPollable &track) {
