@@ -43,17 +43,20 @@ int main(int argc, char **argv)
 	world[0, 6, 4].id = 1;
 	world[0, 34, 7].id = 1;
 
-	int x = 64*2, y = 64*2;
+	int32_t x = 64*2, y = 64*2;
 
 	while (display.is_open()) {
 		display.clear({ 0, 0, 0, 0 });
-		for (uint32_t dy = 0; dy < DIM.y; dy++) {
-			for (uint32_t dx = 0; dx < DIM.x; dx++) {
-				int ox = x / 64, oy = y / 64;
+		auto display_rect = Rect<int32_t>::from_pos_size({}, display.dim());
+		int32_t ox = x / 64, oy = y / 64;
+		int32_t hx = x % 64, hy = y % 64;
+		for (int32_t dy = 0; dy <= DIM.y; dy++) {
+			for (int32_t dx = 0; dx <= DIM.x; dx++) {
 				const auto &img = tiles[world[0, ox + dx, oy + dy].id];
-				Rect<uint16_t> to = Rect<uint16_t>::from_pos_size({ dx*64, dy*64 }, { 64, 64 });
-				//to = to.intersection(display.rect())
-				Rect<uint16_t> from({}, { 64, 64 });
+				Vec2<int32_t> pos(dx * 64 - hx, dy * 64 - hy);
+				auto to = Rect<int32_t>::from_pos_size(pos, { 64, 64 });
+				to &= display_rect;
+				auto from = to - pos;
 				display.draw(img, from, to.low());
 			}
 		}
