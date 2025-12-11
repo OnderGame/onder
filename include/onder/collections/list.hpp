@@ -29,6 +29,11 @@ class List {
 
 public:
 	List() : base(nullptr), len(0), capacity(0) {}
+	List(size_t fill, T value) : List() {
+		reserve(fill);
+		for (size_t i = 0; i < fill; i++)
+			push(value);
+	}
 
 	void reserve(size_t additional) {
 		size_t total = len + additional;

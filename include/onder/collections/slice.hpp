@@ -1,6 +1,8 @@
 #pragma once
 
+#include <cstddef>
 #include <cstdint>
+#include <exception>
 
 namespace onder {
 namespace collections {

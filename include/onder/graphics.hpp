@@ -24,6 +24,9 @@ class Image {
 		return m_data + (m_width * y);
 	}
 
+	Image(const Image &) = delete;
+	Image &operator=(const Image &) = delete;
+
 public:
 	Image() : m_data(nullptr), m_width(0), m_height(0) {}
 	Image(uint16_t width, uint16_t height) : m_data(nullptr), m_width(width), m_height(height) {
@@ -37,6 +40,22 @@ public:
 		delete m_data;
 	}
 
+	Image(Image &&src) : m_data(src.m_data), m_width(src.m_width), m_height(src.m_height) {
+		src.m_width = 0;
+		src.m_height = 0;
+		src.m_data = nullptr;
+	}
+	Image &operator=(Image &&src) {
+		m_width = src.m_width;
+		m_height = src.m_height;
+		m_data = src.m_data;
+		src.m_width = 0;
+		src.m_height = 0;
+		src.m_data = nullptr;
+		return *this;
+	}
+
+	static Image filled(uint16_t width, uint16_t height, Pixel value);
 	static Image from_png(collections::Slice<const uint8_t> data);
 
 	uint16_t width() const {
@@ -62,6 +81,9 @@ public:
 class Window {
 	PixelToaster::Display display;
 	Image buffer;
+
+	Window(const Window &) = delete;
+	Window &operator=(const Window &) = delete;
 
 public:
 	Window(const char *title, uint16_t width, uint16_t height)
