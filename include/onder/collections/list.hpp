@@ -1,18 +1,18 @@
 #pragma once
 
 #include <numeric>
-#include <stdckdint.h>
 
 namespace onder {
 namespace collections {
 
-template<T>
+template<typename T>
 class List {
 	T *base;
 	size_t len, capacity;
 
 	void grow(size_t min_cap) {
-		size_t total = std::max(std::mul_sat(capacity, 2), min_cap);
+		// FIXME overflow checking
+		size_t total = std::max(capacity * 3 / 2, min_cap);
 		// Do *not* use realloc, as C++ cannot deal with suddenly moving objects.
 		T *newbase = new T[total];
 		for (size_t i = 0; i < len; i++)
@@ -29,11 +29,15 @@ class List {
 
 public:
 	List() : base(nullptr), len(0), capacity(0) {}
+	List(size_t fill, T value) : List() {
+		reserve(fill);
+		for (size_t i = 0; i < fill; i++)
+			push(value);
+	}
 
 	void reserve(size_t additional) {
-		// TODO overflow check
-		size_t total;
-		if (chk_add(&total, len, capacity))
+		size_t total = len + additional;
+		if (total < additional)
 			throw std::exception(); // TODO proper exception
 		if (total > capacity)
 			grow(total);
