@@ -23,6 +23,10 @@ class List {
 		m_capacity = total;
 	}
 
+	// Make copy constructor private to avoid accidental copying
+	List(const List &) = delete;
+	List &operator=(const List &) = delete;
+
 public:
 	List() : base(nullptr), m_len(0), m_capacity(0) {}
 	List(size_t fill, T value) : List() {
