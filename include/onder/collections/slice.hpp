@@ -79,6 +79,18 @@ public:
 	iterator end() const {
 		return { base + m_len };
 	}
+
+	Slice<T> slice(size_t from, size_t until) {
+		if (from > until)
+			throw std::exception();
+		if (until > len())
+			throw std::exception();
+		return { base + from, until - from };
+	}
+
+	operator Slice<const T>() {
+		return { base, m_len };
+	}
 };
 
 }
