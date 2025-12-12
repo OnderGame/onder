@@ -59,5 +59,25 @@ void Server::add_subsystem(IServerSubSystem &subsystem) {
 	m_subsystems.push(&subsystem);
 }
 
+ServerChunkManager::ServerChunkManager(world::World &world, Server &server)
+	: m_world(world)
+	, m_server(server)
+{}
+
+void ServerChunkManager::handle_packet(const net::SocketAddr<net::Ip4> &addr, collections::Slice<const uint8_t> data) {
+	if (data.len() < 10)
+		return;
+	uint16_t d = read_raw<uint16_t>((void*)(data.ptr() + 0));
+	uint32_t x = read_raw<uint32_t>((void*)(data.ptr() + 2));
+	uint32_t y = read_raw<uint32_t>((void*)(data.ptr() + 6));
+	const world::Chunk &chunk = m_world.chunk(d, x, y);
+	auto &buffer = m_server.send_begin(0); // FIXME don't hardcode subsystem
+	append_raw(buffer, (uint16_t)0);
+	append_raw(buffer, x);
+	append_raw(buffer, y);
+	buffer.append((uint8_t *)&chunk, sizeof(chunk));
+	m_server.send_end(addr);
+}
+
 }
 }

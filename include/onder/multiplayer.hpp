@@ -57,5 +57,24 @@ public:
 	void add_subsystem(IServerSubSystem &subsystem);
 };
 
+class ClientChunkManager : public IClientSubSystem {
+	world::World &m_world;
+
+public:
+	ClientChunkManager(world::World &world);
+
+	void handle_packet(const net::SocketAddr<net::Ip4> &address, collections::Slice<const uint8_t> data);
+};
+
+class ServerChunkManager : public IServerSubSystem {
+	world::World &m_world;
+	Server &m_server;
+
+public:
+	ServerChunkManager(world::World &world, Server &server);
+
+	void handle_packet(const net::SocketAddr<net::Ip4> &address, collections::Slice<const uint8_t> data);
+};
+
 }
 }

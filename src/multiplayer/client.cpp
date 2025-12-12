@@ -55,5 +55,19 @@ void Client::add_subsystem(IClientSubSystem &subsystem) {
 	m_subsystems.push(&subsystem);
 }
 
+ClientChunkManager::ClientChunkManager(world::World &world)
+	: m_world(world)
+{}
+
+void ClientChunkManager::handle_packet(const net::SocketAddr<net::Ip4> &addr, collections::Slice<const uint8_t> data) {
+	if (data.len() < 10 + sizeof(world::Chunk))
+		return;
+	uint16_t d = read_raw<uint16_t>((void*)(data.ptr() + 0));
+	uint32_t x = read_raw<uint32_t>((void*)(data.ptr() + 2));
+	uint32_t y = read_raw<uint32_t>((void*)(data.ptr() + 6));
+	world::Chunk &chunk = m_world.chunk(d, x, y);
+	::memcpy((void *)&chunk, (void*)&data[10], sizeof(chunk));
+}
+
 }
 }

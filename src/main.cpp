@@ -28,50 +28,6 @@ static void append_raw(List<uint8_t> &buf, const T &x) {
 	buf.append((uint8_t *)&x, sizeof(x));
 }
 
-class ClientChunkManager : public IClientSubSystem {
-	World &m_world;
-
-public:
-	ClientChunkManager(World &world) : m_world(world) {}
-
-	void handle_packet(const SocketAddr<Ip4> &address, Slice<const uint8_t> data);
-};
-
-class ServerChunkManager : public IServerSubSystem {
-	World &m_world;
-	Server &m_server;
-
-public:
-	ServerChunkManager(World &world, Server &server) : m_world(world), m_server(server) {}
-
-	void handle_packet(const SocketAddr<Ip4> &address, Slice<const uint8_t> data);
-};
-
-void ClientChunkManager::handle_packet(const SocketAddr<Ip4> &addr, Slice<const uint8_t> data) {
-	if (data.len() < 10 + sizeof(Chunk))
-		return;
-	uint16_t d = read_raw<uint16_t>((void*)(data.ptr() + 0));
-	uint32_t x = read_raw<uint32_t>((void*)(data.ptr() + 2));
-	uint32_t y = read_raw<uint32_t>((void*)(data.ptr() + 6));
-	Chunk &chunk = m_world.chunk(d, x, y);
-	::memcpy((void *)&chunk, (void*)&data[10], sizeof(chunk));
-}
-
-void ServerChunkManager::handle_packet(const SocketAddr<Ip4> &addr, Slice<const uint8_t> data) {
-	if (data.len() < 10)
-		return;
-	uint16_t d = read_raw<uint16_t>((void*)(data.ptr() + 0));
-	uint32_t x = read_raw<uint32_t>((void*)(data.ptr() + 2));
-	uint32_t y = read_raw<uint32_t>((void*)(data.ptr() + 6));
-	const Chunk &chunk = m_world.chunk(d, x, y);
-	auto &buffer = m_server.send_begin(0); // FIXME don't hardcode subsystem
-	append_raw(buffer, (uint16_t)0);
-	append_raw(buffer, x);
-	append_raw(buffer, y);
-	buffer.append((uint8_t *)&chunk, sizeof(chunk));
-	m_server.send_end(addr);
-}
-
 void server(const SocketAddr<Ip4> &address) {
 	Server server(address);
 	World world(256, 16);
