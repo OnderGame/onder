@@ -11,6 +11,7 @@ struct TileId {
 	uint32_t id;
 
 	TileId() : id(0) {}
+	TileId(uint32_t id) : id(id) {}
 
 	bool is_valid() const {
 		return id != (uint32_t)-1;
