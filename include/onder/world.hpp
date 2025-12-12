@@ -52,11 +52,11 @@ struct ChunkRef {
 		return offset_count != -1;
 	}
 
-	uint32_t offset() {
+	uint32_t offset() const {
 		return offset_count >> 12;
 	}
 
-	uint32_t count() {
+	uint32_t count() const {
 		return offset_count & ((1U << 12) - 1);
 	}
 };
