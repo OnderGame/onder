@@ -94,6 +94,14 @@ public:
 		return { base, m_len };
 	}
 
+	Slice<const T> slice(size_t from, size_t until) const {
+		return ((Slice<const T>)*this).slice(from, until);
+	}
+
+	Slice<T> slice(size_t from, size_t until) {
+		return ((Slice<T>)*this).slice(from, until);
+	}
+
 	const T &operator[](size_t index) const {
 		return ((Slice<const T>)*this)[index];
 	}
