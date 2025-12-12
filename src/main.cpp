@@ -52,10 +52,17 @@ void client(const Ip4 &client_addr, const SocketAddr<Ip4> &server_addr) {
 
 	uint32_t x = 64*2, y = 64*2;
 
-	for(int i=0;i<12;i++) client.buffer.push(0);
-	client.send();
-	client.buffer[4] = 1;
-	client.send();
+	{
+		auto &send = client.send_begin(0);
+		for(int i=0;i<10;i++) send.push(0);
+		client.send_end();
+	}
+	{
+		auto &send = client.send_begin(0);
+		for(int i=0;i<10;i++) send.push(0);
+		send[4] = 1;
+		client.send_end();
+	}
 
 	std::cout << "client started" << std::endl;
 	while (display.is_open()) {

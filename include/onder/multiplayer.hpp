@@ -11,16 +11,17 @@ class Client {
 	net::Udp<net::Ip4> ip4;
 	net::Poller poller;
 	net::SocketAddr<net::Ip4> server_addr;
-
-public:
 	collections::List<uint8_t> buffer; // FIXME don't make this public!
 
+public:
 	Client(const net::SocketAddr<net::Ip4> &addr, const net::SocketAddr<net::Ip4> &server_addr);
 
 	const world::World &world() const;
 
 	void poll();
-	void send();
+
+	collections::List<uint8_t> &send_begin(uint16_t subsystem);
+	void send_end();
 };
 
 class Server {

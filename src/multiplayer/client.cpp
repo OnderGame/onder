@@ -50,7 +50,14 @@ void Client::poll() {
 	}
 }
 
-void Client::send() {
+collections::List<uint8_t> &Client::send_begin(uint16_t subsystem) {
+	buffer.clear();
+	buffer.push((subsystem >> 0) & 0xff);
+	buffer.push((subsystem >> 8) & 0xff);
+	return buffer;
+}
+
+void Client::send_end() {
 	ip4.send(buffer, server_addr);
 }
 
