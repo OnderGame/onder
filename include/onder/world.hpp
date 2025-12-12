@@ -106,6 +106,9 @@ class World {
 
 	const Chunk *chunk(uint8_t depth, uint32_t cx, uint32_t cy) const;
 
+	World(const World &) = delete;
+	World &operator=(const World &) = delete;
+
 public:
 	// layer_size_p2 = log2(layer_size)
 	World(size_t depth, uint8_t layer_size_p2);
