@@ -16,8 +16,7 @@ static void append_raw(collections::List<uint8_t> &buf, const T &x) {
 }
 
 Client::Client(const net::SocketAddr<net::Ip4> &addr, const net::SocketAddr<net::Ip4> &server_addr)
-	: m_world({ 256, 16 })
-	, ip4(addr)
+	: ip4(addr)
 	, server_addr(server_addr)
 {
 	poller.add(ip4);
@@ -35,18 +34,9 @@ void Client::poll() {
 			continue; // ignore invalid requests
 		uint16_t subsystem = read_raw<uint16_t>((void*)buffer.ptr());
 		std::cout << " " << subsystem << std::endl;
-		switch (subsystem) {
-		case 0: {
-			if (buffer.len() < 12 + sizeof(world::Chunk))
-				continue;
-			uint32_t x = read_raw<uint32_t>((void*)(buffer.ptr() + 4));
-			uint32_t y = read_raw<uint32_t>((void*)(buffer.ptr() + 8));
-			world::Chunk &chunk = m_world.chunk(0, x, y);
-			::memcpy((void *)&chunk, (void*)&buffer[12], sizeof(chunk));
-			break;
-		}
-		default: continue;
-		}
+		if (subsystem >= m_subsystems.len())
+			continue; // just ignore
+		m_subsystems[subsystem]->handle_packet(buffer.slice(2, buffer.len()));
 	}
 }
 
@@ -61,8 +51,8 @@ void Client::send_end() {
 	ip4.send(buffer, server_addr);
 }
 
-const world::World &Client::world() const {
-	return m_world;
+void Client::add_subsystem(IClientSubSystem &subsystem) {
+	m_subsystems.push(&subsystem);
 }
 
 }

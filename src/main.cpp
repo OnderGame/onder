@@ -28,6 +28,25 @@ static void append_raw(List<uint8_t> &buf, const T &x) {
 	buf.append((uint8_t *)&x, sizeof(x));
 }
 
+class ClientChunkManager : public IClientSubSystem {
+	World &m_world;
+
+public:
+	ClientChunkManager(World &world) : m_world(world) {}
+
+	void handle_packet(Slice<const uint8_t> data);
+};
+
+void ClientChunkManager::handle_packet(Slice<const uint8_t> data) {
+	if (data.len() < 10 + sizeof(Chunk))
+		return;
+	uint16_t d = read_raw<uint32_t>((void*)(data.ptr() + 0));
+	uint32_t x = read_raw<uint32_t>((void*)(data.ptr() + 2));
+	uint32_t y = read_raw<uint32_t>((void*)(data.ptr() + 6));
+	Chunk &chunk = m_world.chunk(d, x, y);
+	::memcpy((void *)&chunk, (void*)&data[10], sizeof(chunk));
+}
+
 void server(const SocketAddr<Ip4> &address) {
 	Server server(address);
 	std::cout << "server started" << std::endl;
@@ -41,8 +60,11 @@ void client(const Ip4 &client_addr, const SocketAddr<Ip4> &server_addr) {
 	FileMmap png("assets/tiles/stone.png");
 	Window display("Hello framebuffer!", DIM * 64);
 	InputListener inputs;
+	World world({ 256, 16 });
+	ClientChunkManager chunker(world);
 
 	display.set_listener(inputs);
+	client.add_subsystem(chunker);
 
 	auto no_tile = Image::filled({ 64, 64 }, {});
 	tiles[0] = Image::filled({ 64, 64 }, { 127, 127, 127, 127 });
@@ -71,7 +93,7 @@ void client(const Ip4 &client_addr, const SocketAddr<Ip4> &server_addr) {
 		int32_t hx = x % 64, hy = y % 64;
 		for (int32_t dy = 0; dy <= DIM.y; dy++) {
 			for (int32_t dx = 0; dx <= DIM.x; dx++) {
-				const auto &tile = client.world()[0, ox + dx, oy + dy];
+				const auto &tile = world[0, ox + dx, oy + dy];
 				const auto &img = tile.is_valid() ? tiles[tile.id] : no_tile;
 				Vec2<int32_t> pos(dx * 64 - hx, dy * 64 - hy);
 				auto to = Rect<int32_t>::from_pos_size(pos, { 64, 64 });
