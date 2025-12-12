@@ -13,6 +13,9 @@ class Client {
 	net::SocketAddr<net::Ip4> server_addr;
 	collections::List<uint8_t> buffer; // FIXME don't make this public!
 
+	Client(const Client &) = delete;
+	Client &operator=(const Client &) = delete;
+
 public:
 	Client(const net::SocketAddr<net::Ip4> &addr, const net::SocketAddr<net::Ip4> &server_addr);
 
@@ -29,6 +32,9 @@ class Server {
 	net::Udp<net::Ip4> ip4;
 	net::Poller poller;
 	collections::List<uint8_t> buffer;
+
+	Server(const Server &) = delete;
+	Server &operator=(const Server &) = delete;
 
 public:
 	Server(const net::SocketAddr<net::Ip4> &addr);
