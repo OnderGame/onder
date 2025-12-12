@@ -91,6 +91,7 @@ public:
 
 	void free(ChunkRef ref);
 
+	const ChunkSlot *get(const ChunkRef index) const;
 	ChunkSlot &get_or_alloc(ChunkRef &index);
 
 	ChunkSlot &operator[](ChunkRef index);
@@ -103,12 +104,15 @@ class World {
 	// and the size is a power of 2.
 	uint32_t layer_wrap_mask;
 
+	const Chunk *chunk(uint8_t depth, uint32_t cx, uint32_t cy) const;
+
 public:
 	// layer_size_p2 = log2(layer_size)
 	World(size_t depth, uint8_t layer_size_p2);
 
 	Chunk &chunk(uint8_t depth, uint32_t cx, uint32_t cy);
 
+	const TileId operator[](uint8_t depth, uint32_t x, uint32_t y) const;
 	TileId &operator[](uint8_t depth, uint32_t x, uint32_t y);
 };
 
