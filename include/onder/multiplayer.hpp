@@ -8,10 +8,11 @@ namespace multiplayer {
 
 class ISubSystem {
 public:
-	virtual void handle_packet(collections::Slice<const uint8_t> data) = 0;
+	virtual void handle_packet(const net::SocketAddr<net::Ip4> &address, collections::Slice<const uint8_t> data) = 0;
 };
 
 class IClientSubSystem : public ISubSystem {};
+class IServerSubSystem : public ISubSystem {};
 
 class Client {
 	net::Udp<net::Ip4> ip4;
@@ -35,10 +36,11 @@ public:
 };
 
 class Server {
-	world::World m_world;
 	net::Udp<net::Ip4> ip4;
 	net::Poller poller;
-	collections::List<uint8_t> buffer;
+	// use two separate buffers to reduce the potential for mistakes.
+	collections::List<uint8_t> recv_buffer, send_buffer;
+	collections::List<IServerSubSystem *> m_subsystems;
 
 	Server(const Server &) = delete;
 	Server &operator=(const Server &) = delete;
@@ -48,6 +50,11 @@ public:
 
 	void poll();
 	void run();
+
+	collections::List<uint8_t> &send_begin(uint16_t subsystem);
+	void send_end(const net::SocketAddr<net::Ip4> &address);
+
+	void add_subsystem(IServerSubSystem &subsystem);
 };
 
 }

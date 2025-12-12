@@ -26,17 +26,17 @@ void Client::poll() {
 	buffer.clear();
 	buffer.reserve(1 << 13);
 	for (size_t i = 0; i < poller.poll(0); i++) {
-		net::SocketAddr<net::Ip4> addr_stub;
-		if (ip4.recv(buffer, addr_stub) < 0)
+		net::SocketAddr<net::Ip4> addr;
+		if (ip4.recv(buffer, addr) < 0)
 			throw std::exception();
-		std::cout << addr_stub << " <-  " << buffer.len() << std::endl;
+		std::cout << addr << " <-  " << buffer.len() << std::endl;
 		if (buffer.len() < 2)
 			continue; // ignore invalid requests
 		uint16_t subsystem = read_raw<uint16_t>((void*)buffer.ptr());
 		std::cout << " " << subsystem << std::endl;
 		if (subsystem >= m_subsystems.len())
 			continue; // just ignore
-		m_subsystems[subsystem]->handle_packet(buffer.slice(2, buffer.len()));
+		m_subsystems[subsystem]->handle_packet(addr, buffer.slice(2, buffer.len()));
 	}
 }
 
