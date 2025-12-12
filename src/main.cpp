@@ -27,7 +27,7 @@ void append_raw(List<uint8_t> &buf, const T &x) {
 }
 
 void server() {
-	World world(256);
+	World world(256, 16);
 	Poller poller;
 	Udp<Ip4> server({ {}, 3333 });
 	List<uint8_t> recvbuffer;
@@ -83,8 +83,8 @@ void server() {
 }
 
 void client() {
-	World world(256);
-	const Vec2 DIM(36, 12);
+	World world(256, 16);
+	const Vec2 DIM(36, 20);
 	Array<Image, 4> tiles;
 	FileMmap png("assets/tiles/stone.png");
 	Window display("Hello framebuffer!", DIM * 64);

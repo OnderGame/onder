@@ -98,9 +98,13 @@ public:
 class World {
 	collections::List<ChunkRoot> layers;
 	ChunkCollection chunks;
+	// equal to the size - 1,
+	// and the size is a power of 2.
+	uint32_t layer_wrap_mask;
 
 public:
-	World(size_t depth);
+	// layer_size_p2 = log2(layer_size)
+	World(size_t depth, uint8_t layer_size_p2);
 
 	Chunk &chunk(uint8_t depth, uint32_t cx, uint32_t cy);
 

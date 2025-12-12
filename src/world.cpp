@@ -45,11 +45,17 @@ ChunkSlot &ChunkCollection::operator[](ChunkRef index) {
 	return chunks[index.offset()];
 }
 
-World::World(size_t depth)
+World::World(size_t depth, uint8_t layer_size_p2)
 	: layers(depth, {})
-{}
+	, layer_wrap_mask((1ULL << layer_size_p2) - 1)
+{
+	// TODO dynamically adjust trie depth?
+	if (layer_size_p2 < 0 || layer_size_p2 > 20)
+		throw std::exception();
+}
 
 Chunk &World::chunk(uint8_t depth, uint32_t cx, uint32_t cy) {
+	cx &= layer_wrap_mask / CHUNK_DIM, cy &= layer_wrap_mask / CHUNK_DIM;
 	auto f = [](auto v, auto i) { return (v >> (i * CHUNK_DIM_P2)) % CHUNK_DIM; };
 	ChunkRef *ref = &layers[depth].ref;
 	for (uint8_t i = CHUNK_TRIE_DEPTH; i > 0;) {
