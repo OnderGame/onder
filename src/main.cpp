@@ -104,7 +104,7 @@ void client() {
 	tiles[2] = Image::filled({ 64, 64 }, { 255, 255, 0, 255 });
 	tiles[3] = Image::filled({ 64, 64 }, { 255, 0, 0, 255 });
 
-	int32_t x = 64*2, y = 64*2;
+	uint32_t x = 64*2, y = 64*2;
 
 	recvbuffer.reserve(1 << 13);
 
