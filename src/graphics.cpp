@@ -23,8 +23,14 @@ Image Image::from_png(collections::Slice<const uint8_t> data) {
 	auto w = (uint16_t)width, h = (uint16_t)height;
 	if (width != w || height != h)
 		throw std::exception();
-	// FIXME free() isn't compatible with delete[]
-	return { (Pixel *)out, { w, h } };
+	// LodePNG uses malloc/free/realloc internally, which isn't compatible with new/delete
+	// We can easily substitute malloc/free, but replacing realloc requires knowing the old size,
+	// which we don't have.
+	// The easiest fix is to simply copy. What can you do?
+	Pixel *newout = new Pixel[(size_t)w * h];
+	::memcpy((void *)newout, (void *)out, (size_t)w * h * 4);
+	free(out);
+	return { newout, { w, h } };
 }
 
 void Image::copy_from(const Image &src, Rect<uint16_t> from, Vec2<uint16_t> to) {

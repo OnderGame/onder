@@ -43,7 +43,7 @@ public:
 	}
 	Image(Pixel *data, math::Vec2<uint16_t> dim) : m_data(data), m_dim(dim) {}
 	~Image() {
-		delete m_data;
+		delete[] m_data;
 	}
 
 	Image(Image &&src) : m_data(src.m_data), m_dim(src.m_dim) {
@@ -51,6 +51,7 @@ public:
 		src.m_data = nullptr;
 	}
 	Image &operator=(Image &&src) {
+		this->~Image();
 		m_dim = src.m_dim;
 		m_data = src.m_data;
 		src.m_dim = {};
