@@ -56,6 +56,10 @@ public:
 			push(*values++);
 	}
 
+	void append(const Slice<T> slice) {
+		append(slice.ptr(), slice.len());
+	}
+
 	T pop() {
 		if (m_len == 0)
 			throw std::exception();
