@@ -46,7 +46,7 @@ struct ChunkRef {
 	uint32_t offset_count;
 	
 	ChunkRef() : offset_count(-1) {}
-	ChunkRef(uint32_t offset) : offset_count(offset) {}
+	ChunkRef(uint32_t offset) : offset_count(offset << 12) {}
 
 	bool is_valid() const {
 		return offset_count != -1;
