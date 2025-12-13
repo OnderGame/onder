@@ -1,5 +1,6 @@
 #pragma once
 
+#include <new>
 #include <numeric>
 #include <onder/collections/slice.hpp>
 
@@ -14,13 +15,24 @@ class List {
 	void grow(size_t min_cap) {
 		// FIXME overflow checking
 		size_t total = std::max(m_capacity * 3 / 2, min_cap);
+
 		// Do *not* use realloc, as C++ cannot deal with suddenly moving objects.
-		T *newbase = new T[total];
+
+		// we can simplify things by creating a new List,
+		// then moving objects from here to there.
+		// Then all we need to do is move the new list over ourselves.
+
+		// FIXME overflow check
+		T *newbase = reinterpret_cast<T *>(::operator new (sizeof(T) * total, (std::align_val_t)alignof(T)));
 		for (size_t i = 0; i < m_len; i++)
-			newbase[i] = base[i];
-		delete[] base;
-		base = newbase;
-		m_capacity = total;
+			new (&newbase[i]) T(std::move(base[i]));
+
+		List<T> newlist;
+		newlist.base = newbase;
+		newlist.m_len = m_len;
+		newlist.m_capacity = total;
+	
+		*this = std::move(newlist);
 	}
 
 	// Make copy constructor private to avoid accidental copying
@@ -34,6 +46,25 @@ public:
 		for (size_t i = 0; i < fill; i++)
 			push(value);
 	}
+	~List() noexcept {
+		clear();
+		::operator delete (base, sizeof(T) * m_capacity, (std::align_val_t)alignof(T));
+	}
+	List(List &&old) : base(old.base), m_len(old.m_len), m_capacity(old.m_capacity) {
+		old.base = nullptr;
+		old.m_len = 0;
+		old.m_capacity = 0;
+	}
+	List &operator=(List &&old) {
+		this->~List();
+		base = old.base;
+		m_len = old.m_len;
+		m_capacity = old.m_capacity;
+		old.base = nullptr;
+		old.m_len = 0;
+		old.m_capacity = 0;
+		return *this;
+	}
 
 	void reserve(size_t additional) {
 		size_t total = m_len + additional;
@@ -43,10 +74,14 @@ public:
 			grow(total);
 	}
 
-	void push(T value) {
+	void push(const T &value) {
 		reserve(1);
-		base[m_len] = value;
-		++m_len;
+		new (&base[m_len++]) T(value);
+	}
+
+	void push(T &&value) {
+		reserve(1);
+		new (&base[m_len++]) T(std::move(value));
 	}
 
 	void append(const T *values, size_t num) {
@@ -63,10 +98,14 @@ public:
 	T pop() {
 		if (m_len == 0)
 			throw std::exception();
-		return base[--m_len];
+		T value = std::move(base[--m_len]);
+		base[m_len].~T();
+		return value;
 	}
 
 	void clear() {
+		for (size_t i = 0; i < m_len; i++)
+			base[i].~T();
 		m_len = 0;
 	}
 

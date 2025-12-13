@@ -25,38 +25,20 @@ class Image {
 	Pixel *m_data;
 	math::Vec2<uint16_t> m_dim;
 
-	const Pixel *row(uint16_t y) const {
-		return m_data + (m_dim.x * y);
-	}
-
-	Pixel *row(uint16_t y) {
-		return m_data + (m_dim.x * y);
-	}
+	const Pixel *row(uint16_t y) const;
+	Pixel *row(uint16_t y);
 
 	Image(const Image &) = delete;
 	Image &operator=(const Image &) = delete;
 
 public:
 	Image() : m_data(nullptr) {}
-	Image(math::Vec2<uint16_t> dim) : m_data(nullptr), m_dim(dim) {
-		m_data = new Pixel[area()];
-	}
+	Image(math::Vec2<uint16_t> dim);
 	Image(Pixel *data, math::Vec2<uint16_t> dim) : m_data(data), m_dim(dim) {}
-	~Image() {
-		delete m_data;
-	}
+	~Image();
 
-	Image(Image &&src) : m_data(src.m_data), m_dim(src.m_dim) {
-		src.m_dim = {};
-		src.m_data = nullptr;
-	}
-	Image &operator=(Image &&src) {
-		m_dim = src.m_dim;
-		m_data = src.m_data;
-		src.m_dim = {};
-		src.m_data = nullptr;
-		return *this;
-	}
+	Image(Image &&src);
+	Image &operator=(Image &&src);
 
 	static Image filled(math::Vec2<uint16_t> dim, Pixel value);
 	static Image from_png(collections::Slice<const uint8_t> data);
@@ -64,16 +46,11 @@ public:
 	math::Vec2<uint16_t> dim() const;
 	uint32_t area() const;
 
-	const Pixel *data() const {
-		return m_data;
-	}
+	const Pixel *data() const;
 
 	void copy_from(const Image &src, math::Rect<uint16_t> from, math::Vec2<uint16_t> to);
 
-	void fill(Pixel value) {
-		for (size_t i = 0; i < area(); i++)
-			m_data[i] = value;
-	}
+	void fill(Pixel value);
 };
 
 class Window {
