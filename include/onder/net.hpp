@@ -28,7 +28,7 @@ struct SocketAddr {
 	T addr;
 	uint16_t port;
 
-	SocketAddr() {}
+	SocketAddr() : port() {}
 	SocketAddr(T addr, uint16_t port) : addr(addr), port(port) {}
 };
 
