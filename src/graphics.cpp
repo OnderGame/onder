@@ -7,6 +7,35 @@ using namespace onder::math;
 namespace onder {
 namespace graphics {
 
+Image::Image(math::Vec2<uint16_t> dim) : m_data(nullptr), m_dim(dim) {
+	m_data = new Pixel[area()];
+}
+
+Image::~Image() {
+	delete[] m_data;
+}
+
+Image::Image(Image &&src) : m_data(src.m_data), m_dim(src.m_dim) {
+	src.m_dim = {};
+	src.m_data = nullptr;
+}
+Image &Image::operator=(Image &&src) {
+	this->~Image();
+	m_dim = src.m_dim;
+	m_data = src.m_data;
+	src.m_dim = {};
+	src.m_data = nullptr;
+	return *this;
+}
+
+const Pixel *Image::row(uint16_t y) const {
+	return m_data + (m_dim.x * y);
+}
+
+Pixel *Image::row(uint16_t y) {
+	return m_data + (m_dim.x * y);
+}
+
 Image Image::filled(Vec2<uint16_t> dim, Pixel value) {
 	Image img(dim);
 	img.fill(value);
@@ -47,8 +76,17 @@ void Image::copy_from(const Image &src, Rect<uint16_t> from, Vec2<uint16_t> to) 
 	}
 }
 
+void Image::fill(Pixel value) {
+	for (size_t i = 0; i < area(); i++)
+		m_data[i] = value;
+}
+
 Vec2<uint16_t> Image::dim() const {
 	return m_dim;
+}
+
+const Pixel *Image::data() const {
+	return m_data;
 }
 
 uint32_t Image::area() const {
