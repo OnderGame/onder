@@ -104,19 +104,19 @@ class World {
 	// and the size is a power of 2.
 	uint32_t layer_wrap_mask;
 
-	const Chunk *chunk(uint8_t depth, uint32_t cx, uint32_t cy) const;
+	const Chunk *chunk(uint16_t depth, uint32_t cx, uint32_t cy) const;
 
 	World(const World &) = delete;
 	World &operator=(const World &) = delete;
 
 public:
 	// layer_size_p2 = log2(layer_size)
-	World(size_t depth, uint8_t layer_size_p2);
+	World(uint16_t depth, uint8_t layer_size_p2);
 
-	Chunk &chunk(uint8_t depth, uint32_t cx, uint32_t cy);
+	Chunk &chunk(uint16_t depth, uint32_t cx, uint32_t cy);
 
-	const TileId operator[](uint8_t depth, uint32_t x, uint32_t y) const;
-	TileId &operator[](uint8_t depth, uint32_t x, uint32_t y);
+	const TileId operator[](uint16_t depth, uint32_t x, uint32_t y) const;
+	TileId &operator[](uint16_t depth, uint32_t x, uint32_t y);
 };
 
 }

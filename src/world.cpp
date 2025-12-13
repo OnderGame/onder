@@ -53,7 +53,7 @@ ChunkSlot &ChunkCollection::operator[](ChunkRef index) {
 	return chunks[index.offset()];
 }
 
-World::World(size_t depth, uint8_t layer_size_p2)
+World::World(uint16_t depth, uint8_t layer_size_p2)
 	: layers(depth, {})
 	, layer_wrap_mask((1ULL << layer_size_p2) - 1)
 {
@@ -62,7 +62,7 @@ World::World(size_t depth, uint8_t layer_size_p2)
 		throw std::exception();
 }
 
-const Chunk *World::chunk(uint8_t depth, uint32_t cx, uint32_t cy) const {
+const Chunk *World::chunk(uint16_t depth, uint32_t cx, uint32_t cy) const {
 	cx &= layer_wrap_mask / CHUNK_DIM, cy &= layer_wrap_mask / CHUNK_DIM;
 	auto f = [](auto v, auto i) { return (v >> (i * CHUNK_DIM_P2)) % CHUNK_DIM; };
 	const ChunkRef *ref = &layers[depth].ref;
@@ -77,7 +77,7 @@ const Chunk *World::chunk(uint8_t depth, uint32_t cx, uint32_t cy) const {
 	return (Chunk *)chunks.get(*ref);
 }
 
-Chunk &World::chunk(uint8_t depth, uint32_t cx, uint32_t cy) {
+Chunk &World::chunk(uint16_t depth, uint32_t cx, uint32_t cy) {
 	cx &= layer_wrap_mask / CHUNK_DIM, cy &= layer_wrap_mask / CHUNK_DIM;
 	auto f = [](auto v, auto i) { return (v >> (i * CHUNK_DIM_P2)) % CHUNK_DIM; };
 	ChunkRef *ref = &layers[depth].ref;
@@ -90,12 +90,12 @@ Chunk &World::chunk(uint8_t depth, uint32_t cx, uint32_t cy) {
 	return chunks.get_or_alloc(*ref).leaf;
 }
 
-const TileId World::operator[](uint8_t depth, uint32_t x, uint32_t y) const {
+const TileId World::operator[](uint16_t depth, uint32_t x, uint32_t y) const {
 	const Chunk *c = chunk(depth, x / CHUNK_DIM, y / CHUNK_DIM);
 	return c != nullptr ? c->tiles[y % CHUNK_DIM][x % CHUNK_DIM] : TILEID_INVALID;
 }
 
-TileId &World::operator[](uint8_t depth, uint32_t x, uint32_t y) {
+TileId &World::operator[](uint16_t depth, uint32_t x, uint32_t y) {
 	Chunk &c = chunk(depth, x / CHUNK_DIM, y / CHUNK_DIM);
 	return c.tiles[y % CHUNK_DIM][x % CHUNK_DIM];
 }
