@@ -50,7 +50,7 @@ int Udp<Ip4>::recv(collections::List<uint8_t> &buffer, SocketAddr<Ip4> &address)
 		return -1;
 	address.addr.addr = ntohl(addr.sin_addr.s_addr);
 	address.port = ntohs(addr.sin_port);
-	buffer.set_len(res);
+	buffer.set_len((size_t)res);
 	return 0;
 }
 
@@ -75,7 +75,10 @@ void Poller::add(const IPollable &track) {
 }
 
 size_t Poller::poll(int timeout_ms) {
-	return ::poll(fds.ptr(), (::nfds_t)fds.len(), timeout_ms);
+	int res = ::poll(fds.ptr(), (::nfds_t)fds.len(), timeout_ms);
+	if (res < 0)
+		throw std::exception();
+	return (size_t)res;
 }
 
 template<typename T>
@@ -87,10 +90,10 @@ Array<uint8_t, sizeof(T)> to_le_bytes(T t) {
 }
 
 template<typename T>
-T from_le_bytes(const Array<uint8_t, sizeof(T)> &a) {
+T from_le_bytes(Array<uint8_t, sizeof(T)> a) {
 	T t(0);
-	for (size_t i = sizeof(T); i > 0; )
-		t <<= 8, --i, t |= (T)a[i];
+	for (size_t i = 0; i < sizeof(T); i++)
+		t |= (T)((T)a[i] << (i * 8));
 	return t;
 }
 
@@ -103,17 +106,15 @@ template Array<uint8_t, 2> to_le_bytes(uint16_t);
 template Array<uint8_t, 4> to_le_bytes(uint32_t);
 template Array<uint8_t, 8> to_le_bytes(uint64_t);
 
-template int8_t from_le_bytes(const Array<uint8_t, 1> &);
-template int16_t from_le_bytes(const Array<uint8_t, 2> &);
-template int32_t from_le_bytes(const Array<uint8_t, 4> &);
-template int64_t from_le_bytes(const Array<uint8_t, 8> &);
-template uint8_t from_le_bytes(const Array<uint8_t, 1> &);
-template uint16_t from_le_bytes(const Array<uint8_t, 2> &);
-template uint32_t from_le_bytes(const Array<uint8_t, 4> &);
-template uint64_t from_le_bytes(const Array<uint8_t, 8> &);
+template uint8_t from_le_bytes(Array<uint8_t, 1>);
+template uint16_t from_le_bytes(Array<uint8_t, 2>);
+template uint32_t from_le_bytes(Array<uint8_t, 4>);
+template uint64_t from_le_bytes(Array<uint8_t, 8>);
+template int8_t from_le_bytes(Array<uint8_t, 1>);
+template int16_t from_le_bytes(Array<uint8_t, 2>);
+template int32_t from_le_bytes(Array<uint8_t, 4>);
+template int64_t from_le_bytes(Array<uint8_t, 8>);
 
-template<typename T>
-T from_ne_bytes(const uint8_t *);
 
 std::ostream &operator<<(std::ostream &out, const Ip4 &value) {
 	auto f = [value](size_t i) { return (value.addr >> i) & 0xff; };

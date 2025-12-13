@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <limits>
 #include <onder/collections/array.hpp>
 #include <onder/collections/list.hpp>
 
@@ -45,11 +46,11 @@ struct ChunkRef {
 	// if -1, invalid
 	uint32_t offset_count;
 	
-	ChunkRef() : offset_count(-1) {}
-	ChunkRef(uint32_t offset) : offset_count(offset) {}
+	ChunkRef() : offset_count(std::numeric_limits<uint32_t>::max()) {}
+	ChunkRef(uint32_t offset) : offset_count(offset << 12) {}
 
 	bool is_valid() const {
-		return offset_count != -1;
+		return offset_count != std::numeric_limits<uint32_t>::max();
 	}
 
 	uint32_t offset() const {
@@ -104,19 +105,19 @@ class World {
 	// and the size is a power of 2.
 	uint32_t layer_wrap_mask;
 
-	const Chunk *chunk(uint8_t depth, uint32_t cx, uint32_t cy) const;
+	const Chunk *chunk(uint16_t depth, uint32_t cx, uint32_t cy) const;
 
 	World(const World &) = delete;
 	World &operator=(const World &) = delete;
 
 public:
 	// layer_size_p2 = log2(layer_size)
-	World(size_t depth, uint8_t layer_size_p2);
+	World(uint16_t depth, uint8_t layer_size_p2);
 
-	Chunk &chunk(uint8_t depth, uint32_t cx, uint32_t cy);
+	Chunk &chunk(uint16_t depth, uint32_t cx, uint32_t cy);
 
-	const TileId operator[](uint8_t depth, uint32_t x, uint32_t y) const;
-	TileId &operator[](uint8_t depth, uint32_t x, uint32_t y);
+	const TileId operator[](uint16_t depth, uint32_t x, uint32_t y) const;
+	TileId &operator[](uint16_t depth, uint32_t x, uint32_t y);
 };
 
 }

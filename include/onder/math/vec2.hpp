@@ -17,10 +17,11 @@ struct Vec2 {
 	}
 
 	Vec2<T> operator+(const Vec2<T> &rhs) const {
-		return { x + rhs.x, y + rhs.y };
+		// thanks, implicit upcasts!
+		return { (T)(x + rhs.x), (T)(y + rhs.y) };
 	}
 	Vec2<T> operator-(const Vec2<T> &rhs) const {
-		return { x - rhs.x, y - rhs.y };
+		return { (T)(x - rhs.x), (T)(y - rhs.y) };
 	}
 	Vec2<T> operator*(const T &v) const {
 		return { x * v, y * v };

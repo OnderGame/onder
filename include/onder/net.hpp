@@ -28,7 +28,7 @@ struct SocketAddr {
 	T addr;
 	uint16_t port;
 
-	SocketAddr() {}
+	SocketAddr() : port() {}
 	SocketAddr(T addr, uint16_t port) : addr(addr), port(port) {}
 };
 
@@ -72,7 +72,7 @@ template<typename T>
 collections::Array<uint8_t, sizeof(T)> to_le_bytes(T);
 
 template<typename T>
-T from_le_bytes(const collections::Array<uint8_t, sizeof(T)> &);
+T from_le_bytes(const collections::Array<uint8_t, sizeof(T)>);
 
 std::ostream &operator<<(std::ostream &out, const Ip4 &value);
 std::ostream &operator<<(std::ostream &out, const Ip6 &value);

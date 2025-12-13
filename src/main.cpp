@@ -44,7 +44,7 @@ void server(const SocketAddr<Ip4> &address) {
 
 void client(const Ip4 &client_addr, const SocketAddr<Ip4> &server_addr) {
 	Client client({ client_addr, 0 }, server_addr);
-	const Vec2 DIM(36, 20);
+	const Vec2<uint32_t> DIM(36, 20);
 	Array<Image, 4> tiles;
 	FileMmap png("assets/tiles/stone.png");
 	Window display("Hello framebuffer!", DIM * 64);
@@ -68,14 +68,14 @@ void client(const Ip4 &client_addr, const SocketAddr<Ip4> &server_addr) {
 
 	std::cout << "client started" << std::endl;
 	while (display.is_open()) {
-		auto display_rect = Rect<int32_t>::from_pos_size({}, display.dim());
-		int32_t ox = x / 64, oy = y / 64;
-		int32_t hx = x % 64, hy = y % 64;
-		for (int32_t dy = 0; dy <= DIM.y; dy++) {
-			for (int32_t dx = 0; dx <= DIM.x; dx++) {
+		auto display_rect = Rect<uint32_t>::from_pos_size({}, display.dim());
+		uint32_t ox = x / 64, oy = y / 64;
+		uint32_t hx = x % 64, hy = y % 64;
+		for (uint32_t dy = 0; dy <= DIM.y; dy++) {
+			for (uint32_t dx = 0; dx <= DIM.x; dx++) {
 				const auto &tile = world[0, ox + dx, oy + dy];
 				const auto &img = tile.is_valid() ? tiles[tile.id] : no_tile;
-				Vec2<int32_t> pos(dx * 64 - hx, dy * 64 - hy);
+				Vec2<uint32_t> pos(dx * 64 - hx, dy * 64 - hy);
 				auto to = Rect<int32_t>::from_pos_size(pos, { 64, 64 });
 				to &= display_rect;
 				auto from = to - pos;
@@ -113,6 +113,8 @@ void adhoc() {
 }
 
 int main(int argc, char **argv) {
+	(void)argc;
+	(void)argv;
 	adhoc();
 	return 0;
 }
