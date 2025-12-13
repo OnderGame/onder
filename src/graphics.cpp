@@ -30,10 +30,11 @@ Image Image::from_png(collections::Slice<const uint8_t> data) {
 void Image::copy_from(const Image &src, Rect<uint16_t> from, Vec2<uint16_t> to) {
 	if (src.dim().x < from.high().x || src.dim().y < from.high().y)
 		throw std::exception();
-	if (dim().x < (uint32_t)to.x + from.dim().x || dim().y < (uint32_t)to.y + from.dim().y)
+	Vec2<uint32_t> from_dim = from.dim();
+	if (dim().x < (uint32_t)to.x + from_dim.x || dim().y < (uint32_t)to.y + from_dim.y)
 		throw std::exception();
 
-	for (size_t y = 0; y < from.dim().y; y++) {
+	for (uint16_t y = 0; y < from.dim().y; y++) {
 		Pixel *rd = row(to.y + y);
 		const Pixel *rs = src.row(from.low().y + y);
 		::memcpy((void *)(rd + to.x), (void *)(rs + from.low().x), from.dim().x * 4ULL);

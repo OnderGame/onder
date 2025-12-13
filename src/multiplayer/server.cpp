@@ -38,8 +38,7 @@ void Server::poll() {
 
 collections::List<uint8_t> &Server::send_begin(uint16_t subsystem) {
 	send_buffer.clear();
-	send_buffer.push((subsystem >> 0) & 0xff);
-	send_buffer.push((subsystem >> 8) & 0xff);
+	send_buffer.append(net::to_le_bytes<uint16_t>(subsystem));
 	return send_buffer;
 }
 

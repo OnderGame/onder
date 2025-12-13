@@ -1,11 +1,12 @@
 #include <onder/world.hpp>
 #include <cstring>
 #include <sys/mman.h>
+#include <limits>
 
 namespace onder {
 namespace world {
 
-static const TileId TILEID_INVALID(-1);
+static const TileId TILEID_INVALID(std::numeric_limits<uint32_t>::max());
 
 ChunkCollection::ChunkCollection()
 	: chunks(nullptr)
@@ -17,7 +18,7 @@ ChunkCollection::ChunkCollection()
 	if (base == MAP_FAILED)
 		throw std::exception();
 	chunks = (ChunkSlot *)base;
-	max_chunks = size / sizeof(ChunkSlot);
+	max_chunks = (uint32_t)(size / sizeof(ChunkSlot));
 }
 
 ChunkCollection::~ChunkCollection() {
@@ -55,10 +56,10 @@ ChunkSlot &ChunkCollection::operator[](ChunkRef index) {
 
 World::World(uint16_t depth, uint8_t layer_size_p2)
 	: layers(depth, {})
-	, layer_wrap_mask((1ULL << layer_size_p2) - 1)
+	, layer_wrap_mask(((uint32_t)1 << layer_size_p2) - 1)
 {
 	// TODO dynamically adjust trie depth?
-	if (layer_size_p2 < 0 || layer_size_p2 > 20)
+	if (layer_size_p2 > 20)
 		throw std::exception();
 }
 

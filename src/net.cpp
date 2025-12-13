@@ -50,7 +50,7 @@ int Udp<Ip4>::recv(collections::List<uint8_t> &buffer, SocketAddr<Ip4> &address)
 		return -1;
 	address.addr.addr = ntohl(addr.sin_addr.s_addr);
 	address.port = ntohs(addr.sin_port);
-	buffer.set_len(res);
+	buffer.set_len((size_t)res);
 	return 0;
 }
 
@@ -75,7 +75,10 @@ void Poller::add(const IPollable &track) {
 }
 
 size_t Poller::poll(int timeout_ms) {
-	return ::poll(fds.ptr(), (::nfds_t)fds.len(), timeout_ms);
+	int res = ::poll(fds.ptr(), (::nfds_t)fds.len(), timeout_ms);
+	if (res < 0)
+		throw std::exception();
+	return (size_t)res;
 }
 
 template<typename T>

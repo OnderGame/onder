@@ -51,6 +51,7 @@ ClientChunkManager::ClientChunkManager(world::World &world, Client &client)
 {}
 
 void ClientChunkManager::handle_packet(const net::SocketAddr<net::Ip4> &addr, collections::Slice<const uint8_t> data) {
+	(void)addr;
 	if (data.len() < 10 + sizeof(world::Chunk))
 		return;
 	auto y = net::from_le_bytes<uint32_t>(*(Array<uint8_t, 4> *)&data[6]);

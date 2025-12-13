@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <limits>
 #include <onder/collections/array.hpp>
 #include <onder/collections/list.hpp>
 
@@ -45,11 +46,11 @@ struct ChunkRef {
 	// if -1, invalid
 	uint32_t offset_count;
 	
-	ChunkRef() : offset_count(-1) {}
+	ChunkRef() : offset_count(std::numeric_limits<uint32_t>::max()) {}
 	ChunkRef(uint32_t offset) : offset_count(offset << 12) {}
 
 	bool is_valid() const {
-		return offset_count != -1;
+		return offset_count != std::numeric_limits<uint32_t>::max();
 	}
 
 	uint32_t offset() const {

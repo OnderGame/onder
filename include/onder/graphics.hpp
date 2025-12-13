@@ -4,12 +4,17 @@
 #include <cstdlib>
 #include <cstring>
 #include <exception>
-#include <PixelToaster.h>
 #include <onder/collections/array.hpp>
 #include <onder/collections/slice.hpp>
 #include <onder/collections/list.hpp>
 #include <onder/math/vec2.hpp>
 #include <onder/math/rect.hpp>
+
+#pragma GCC diagnostic push
+# pragma GCC diagnostic ignored "-Wunused-parameter"
+# pragma GCC diagnostic ignored "-Wpedantic" // "ISO C++ prohibits anonymous structs"
+# include <PixelToaster.h>
+#pragma GCC diagnostic pop
 
 namespace onder {
 namespace graphics {
@@ -17,8 +22,8 @@ namespace graphics {
 using Pixel = PixelToaster::TrueColorPixel;
 
 class Image {
-	math::Vec2<uint16_t> m_dim;
 	Pixel *m_data;
+	math::Vec2<uint16_t> m_dim;
 
 	const Pixel *row(uint16_t y) const {
 		return m_data + (m_dim.x * y);
@@ -41,7 +46,7 @@ public:
 		delete m_data;
 	}
 
-	Image(Image &&src) : m_dim(src.m_dim), m_data(src.m_data) {
+	Image(Image &&src) : m_data(src.m_data), m_dim(src.m_dim) {
 		src.m_dim = {};
 		src.m_data = nullptr;
 	}
@@ -151,35 +156,53 @@ public:
     virtual bool defaultKeyHandlers() const { return true; }
 
     virtual void onKeyDown(PixelToaster::DisplayInterface& display, PixelToaster::Key key) override {
+		(void)display;
 		PixelToaster::Key::Code code = key; // TODO how does this work? operator Code()
 		m_events.push({ { (Key::Code)code }, InputState::DOWN });
 	}
 
     virtual void onKeyPressed(PixelToaster::DisplayInterface& display, PixelToaster::Key key) override {
+		(void)display;
 		PixelToaster::Key::Code code = key;
 		m_events.push({ { (Key::Code)code }, InputState::PRESSED });
 	}
 
     virtual void onKeyUp(PixelToaster::DisplayInterface& display, PixelToaster::Key key) override {
+		(void)display;
 		PixelToaster::Key::Code code = key;
 		m_events.push({ { (Key::Code)code }, InputState::UP });
 	}
 
     virtual void onMouseButtonDown(PixelToaster::DisplayInterface& display, PixelToaster::Mouse mouse) override {
+		(void)display;
+		(void)mouse;
 		//inputs.push({ { (Key::Code)key.Code() }, InputState::DOWN });
 	}
 
     virtual void onMouseButtonUp(PixelToaster::DisplayInterface& display, PixelToaster::Mouse mouse) override {
+		(void)display;
+		(void)mouse;
 		//inputs.push({ { (Key::Code)key.Code() }, InputState::UP });
 	}
 
-    virtual void onMouseMove(PixelToaster::DisplayInterface& display, PixelToaster::Mouse mouse) {}
+    virtual void onMouseMove(PixelToaster::DisplayInterface& display, PixelToaster::Mouse mouse) {
+		(void)display;
+		(void)mouse;
+	}
 
-    virtual void onActivate(PixelToaster::DisplayInterface& display, bool active) {}
+    virtual void onActivate(PixelToaster::DisplayInterface& display, bool active) {
+		(void)display;
+		(void)active;
+	}
 
-    virtual void onOpen(PixelToaster::DisplayInterface& display) {}
+    virtual void onOpen(PixelToaster::DisplayInterface& display) {
+		(void)display;
+	}
 
-    virtual bool onClose(PixelToaster::DisplayInterface& display) { return true; }
+    virtual bool onClose(PixelToaster::DisplayInterface& display) {
+		(void)display;
+		return true;
+	}
 };
 
 class Render {
