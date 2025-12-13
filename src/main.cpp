@@ -61,7 +61,7 @@ void client(const Ip4 &client_addr, const SocketAddr<Ip4> &server_addr) {
 	Window display("Hello framebuffer!", DIM * 64);
 	InputListener inputs;
 	World world(256, 16);
-	ClientChunkManager chunker(world);
+	ClientChunkManager chunker(world, client);
 
 	display.set_listener(inputs);
 	client.add_subsystem(chunker);
@@ -74,17 +74,8 @@ void client(const Ip4 &client_addr, const SocketAddr<Ip4> &server_addr) {
 
 	uint32_t x = 64*2, y = 64*2;
 
-	{
-		auto &send = client.send_begin(0);
-		for(int i=0;i<10;i++) send.push(0);
-		client.send_end();
-	}
-	{
-		auto &send = client.send_begin(0);
-		for(int i=0;i<10;i++) send.push(0);
-		send[4] = 1;
-		client.send_end();
-	}
+	chunker.request_chunk(0, { 0, 0 });
+	chunker.request_chunk(0, { 1, 0 });
 
 	std::cout << "client started" << std::endl;
 	while (display.is_open()) {

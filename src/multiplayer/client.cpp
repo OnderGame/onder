@@ -15,6 +15,12 @@ static void append_raw(collections::List<uint8_t> &buf, const T &x) {
 	buf.append((uint8_t *)&x, sizeof(x));
 }
 
+template<typename T>
+static void append_num(collections::List<uint8_t> &buf, T x) {
+	for (int i = 0; i < sizeof(T); i++)
+		buf.push((x >> 8*i) & 0xff);
+}
+
 Client::Client(const net::SocketAddr<net::Ip4> &addr, const net::SocketAddr<net::Ip4> &server_addr)
 	: ip4(addr)
 	, server_addr(server_addr)
@@ -42,8 +48,7 @@ void Client::poll() {
 
 collections::List<uint8_t> &Client::send_begin(uint16_t subsystem) {
 	buffer.clear();
-	buffer.push((subsystem >> 0) & 0xff);
-	buffer.push((subsystem >> 8) & 0xff);
+	append_num(buffer, subsystem);
 	return buffer;
 }
 
@@ -55,8 +60,9 @@ void Client::add_subsystem(IClientSubSystem &subsystem) {
 	m_subsystems.push(&subsystem);
 }
 
-ClientChunkManager::ClientChunkManager(world::World &world)
+ClientChunkManager::ClientChunkManager(world::World &world, Client &client)
 	: m_world(world)
+	, m_client(client)
 {}
 
 void ClientChunkManager::handle_packet(const net::SocketAddr<net::Ip4> &addr, collections::Slice<const uint8_t> data) {
@@ -67,6 +73,18 @@ void ClientChunkManager::handle_packet(const net::SocketAddr<net::Ip4> &addr, co
 	uint32_t y = read_raw<uint32_t>((void*)(data.ptr() + 6));
 	world::Chunk &chunk = m_world.chunk(d, x, y);
 	::memcpy((void *)&chunk, (void*)&data[10], sizeof(chunk));
+}
+
+void ClientChunkManager::request_chunk(uint16_t depth, math::Vec2<uint32_t> chunk_pos) {
+	auto &send = m_client.send_begin(0); // FIXME don't hardcode
+	append_num(send, depth);
+	append_num(send, chunk_pos.x);
+	append_num(send, chunk_pos.y);
+	m_client.send_end();
+}
+
+void ClientChunkManager::request_tile(uint16_t depth, math::Vec2<uint32_t> chunk_pos) {
+	request_chunk(depth, chunk_pos / world::CHUNK_DIM);
 }
 
 }

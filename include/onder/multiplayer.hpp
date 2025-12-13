@@ -1,5 +1,6 @@
 #pragma once
 
+#include <onder/math/vec2.hpp>
 #include <onder/net.hpp>
 #include <onder/world.hpp>
 
@@ -59,11 +60,15 @@ public:
 
 class ClientChunkManager : public IClientSubSystem {
 	world::World &m_world;
+	Client &m_client;
 
 public:
-	ClientChunkManager(world::World &world);
+	ClientChunkManager(world::World &world, Client &client);
 
 	void handle_packet(const net::SocketAddr<net::Ip4> &address, collections::Slice<const uint8_t> data);
+
+	void request_chunk(uint16_t depth, math::Vec2<uint32_t> chunk_pos);
+	void request_tile(uint16_t depth, math::Vec2<uint32_t> tile_pos);
 };
 
 class ServerChunkManager : public IServerSubSystem {
