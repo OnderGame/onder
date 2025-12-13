@@ -17,17 +17,6 @@ using namespace onder::math;
 using namespace onder::net;
 using namespace onder::multiplayer;
 
-template<typename T>
-static T read_raw(void *src) {
-	T x;
-	::memcpy((void *)&x, src, sizeof(x));
-	return x;
-}
-template<typename T>
-static void append_raw(List<uint8_t> &buf, const T &x) {
-	buf.append((uint8_t *)&x, sizeof(x));
-}
-
 void server(const SocketAddr<Ip4> &address) {
 	Server server(address);
 	World world(256, 16);

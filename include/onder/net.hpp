@@ -1,5 +1,6 @@
 #pragma once
 
+#include <onder/collections/array.hpp>
 #include <onder/collections/list.hpp>
 #include <poll.h>
 #include <iostream>
@@ -62,6 +63,16 @@ public:
 	void add(const IPollable &track);
 	size_t poll(int timeout_ms);
 };
+
+// Why a template and not overloads?
+//
+// The main idea is to avoid unexpected implicit casting and cause
+// a linker error if an unsupported type is passed (e.g. float).
+template<typename T>
+collections::Array<uint8_t, sizeof(T)> to_le_bytes(T);
+
+template<typename T>
+T from_le_bytes(const collections::Array<uint8_t, sizeof(T)> &);
 
 std::ostream &operator<<(std::ostream &out, const Ip4 &value);
 std::ostream &operator<<(std::ostream &out, const Ip6 &value);

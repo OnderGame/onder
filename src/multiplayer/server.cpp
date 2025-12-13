@@ -1,19 +1,11 @@
+#include <onder/collections/array.hpp>
 #include <onder/multiplayer.hpp>
 #include <cstring>
 
 namespace onder {
 namespace multiplayer {
 
-template<typename T>
-static T read_raw(void *src) {
-	T x;
-	::memcpy((void *)&x, src, sizeof(x));
-	return x;
-}
-template<typename T>
-static void append_raw(collections::List<uint8_t> &buf, const T &x) {
-	buf.append((uint8_t *)&x, sizeof(x));
-}
+using namespace onder::collections;
 
 Server::Server(const net::SocketAddr<net::Ip4> &addr) : ip4(addr) {
 }
@@ -36,7 +28,7 @@ void Server::poll() {
 		std::cout << addr << " <-  " << recv_buffer.len() << std::endl;
 		if (recv_buffer.len() < 2)
 			continue; // ignore invalid requests
-		uint16_t subsystem = read_raw<uint16_t>((void*)recv_buffer.ptr());
+		auto subsystem = net::from_le_bytes<uint16_t>(*(Array<uint8_t, 2> *)&recv_buffer[0]);
 		std::cout << "     ~ " << subsystem << std::endl;
 		if (subsystem >= m_subsystems.len())
 			continue; // just ignore
@@ -67,14 +59,15 @@ ServerChunkManager::ServerChunkManager(world::World &world, Server &server)
 void ServerChunkManager::handle_packet(const net::SocketAddr<net::Ip4> &addr, collections::Slice<const uint8_t> data) {
 	if (data.len() < 10)
 		return;
-	uint16_t d = read_raw<uint16_t>((void*)(data.ptr() + 0));
-	uint32_t x = read_raw<uint32_t>((void*)(data.ptr() + 2));
-	uint32_t y = read_raw<uint32_t>((void*)(data.ptr() + 6));
+	auto y = net::from_le_bytes<uint32_t>(*(Array<uint8_t, 4> *)&data[6]);
+	auto x = net::from_le_bytes<uint32_t>(*(Array<uint8_t, 4> *)&data[2]);
+	auto d = net::from_le_bytes<uint16_t>(*(Array<uint8_t, 2> *)&data[0]);
 	const world::Chunk &chunk = m_world.chunk(d, x, y);
 	auto &buffer = m_server.send_begin(0); // FIXME don't hardcode subsystem
-	append_raw(buffer, (uint16_t)0);
-	append_raw(buffer, x);
-	append_raw(buffer, y);
+	buffer.reserve(2 + 4*2 + 32*32*4);
+	buffer.append(net::to_le_bytes<uint16_t>(0));
+	buffer.append(net::to_le_bytes<uint32_t>(x));
+	buffer.append(net::to_le_bytes<uint32_t>(y));
 	buffer.append((uint8_t *)&chunk, sizeof(chunk));
 	m_server.send_end(addr);
 }
