@@ -19,7 +19,7 @@ class Array {
 public:
 	using iterator = typename Slice<T>::iterator;
 
-	Array() : values({}) {}
+	Array() : values() {}
 
 	const T &operator[](size_t index) const {
 		check_bounds(index);
