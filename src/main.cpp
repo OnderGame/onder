@@ -1,33 +1,28 @@
+#include <cerrno>
+#include <csignal>
 #include <cstddef>
+#include <sys/prctl.h>
 #include <onder/filesystem.hpp>
 #include <onder/graphics.hpp>
+#include <onder/net.hpp>
 #include <onder/world.hpp>
+#include <onder/multiplayer.hpp>
 #include <iostream>
 
-int main(int argc, char **argv)
-{
-	using namespace onder::collections;
-	using namespace onder::graphics;
-	using namespace onder::world;
-	using namespace onder::filesystem;
-	using namespace onder::math;
+using namespace onder::collections;
+using namespace onder::graphics;
+using namespace onder::world;
+using namespace onder::filesystem;
+using namespace onder::math;
+using namespace onder::net;
+using namespace onder::multiplayer;
 
-	const Vec2 DIM(36, 12);
+void server(const SocketAddr<Ip4> &address) {
+	Server server(address);
+	World world(256, 16);
+	ServerChunkManager chunker(world, server);
 
-	Window display("Hello framebuffer!", DIM * 64);
-	World world(256);
-
-	Array<Image, 4> tiles;
-
-	FileMmap png("assets/tiles/stone.png");
-
-	InputListener inputs;
-	display.set_listener(inputs);
-
-	tiles[0] = Image::filled({ 64, 64 }, { 127, 127, 127, 127 });
-	tiles[1] = Image::from_png(png.slice());
-	tiles[2] = Image::filled({ 64, 64 }, { 255, 255, 0, 255 });
-	tiles[3] = Image::filled({ 64, 64 }, { 255, 0, 0, 255 });
+	server.add_subsystem(chunker);
 
 	for (uint32_t y = 0; y < 64; y++) {
 		for (uint32_t x = 0; x < 64; x++) {
@@ -43,16 +38,43 @@ int main(int argc, char **argv)
 	world[0, 6, 4].id = 1;
 	world[0, 34, 7].id = 1;
 
-	int32_t x = 64*2, y = 64*2;
+	std::cout << "server started" << std::endl;
+	server.run();
+}
 
+void client(const Ip4 &client_addr, const SocketAddr<Ip4> &server_addr) {
+	Client client({ client_addr, 0 }, server_addr);
+	const Vec2 DIM(36, 20);
+	Array<Image, 4> tiles;
+	FileMmap png("assets/tiles/stone.png");
+	Window display("Hello framebuffer!", DIM * 64);
+	InputListener inputs;
+	World world(256, 16);
+	ClientChunkManager chunker(world, client);
+
+	display.set_listener(inputs);
+	client.add_subsystem(chunker);
+
+	auto no_tile = Image::filled({ 64, 64 }, {});
+	tiles[0] = Image::filled({ 64, 64 }, { 127, 127, 127, 127 });
+	tiles[1] = Image::from_png(png.slice());
+	tiles[2] = Image::filled({ 64, 64 }, { 255, 255, 0, 255 });
+	tiles[3] = Image::filled({ 64, 64 }, { 255, 0, 0, 255 });
+
+	uint32_t x = 64*2, y = 64*2;
+
+	chunker.request_chunk(0, { 0, 0 });
+	chunker.request_chunk(0, { 1, 0 });
+
+	std::cout << "client started" << std::endl;
 	while (display.is_open()) {
-		display.clear({ 0, 0, 0, 0 });
 		auto display_rect = Rect<int32_t>::from_pos_size({}, display.dim());
 		int32_t ox = x / 64, oy = y / 64;
 		int32_t hx = x % 64, hy = y % 64;
 		for (int32_t dy = 0; dy <= DIM.y; dy++) {
 			for (int32_t dx = 0; dx <= DIM.x; dx++) {
-				const auto &img = tiles[world[0, ox + dx, oy + dy].id];
+				const auto &tile = world[0, ox + dx, oy + dy];
+				const auto &img = tile.is_valid() ? tiles[tile.id] : no_tile;
 				Vec2<int32_t> pos(dx * 64 - hx, dy * 64 - hy);
 				auto to = Rect<int32_t>::from_pos_size(pos, { 64, 64 });
 				to &= display_rect;
@@ -71,7 +93,26 @@ int main(int argc, char **argv)
 			}
 		}
 		inputs.clear_events();
+		client.poll();
 	}
+}
 
+void adhoc() {
+	const Ip4 localhost(127, 0, 0, 1);
+	pid_t child = fork();
+	if (child < 0)
+		throw std::exception();
+	if (child == 0) {
+		// FIXME potential race condition here... bah
+		if (::prctl(PR_SET_PDEATHSIG, SIGINT) < 0)
+			std::cerr << "prctrl(PR_SET_PDEATHSIG, SIGINT) failed: " << ::strerror(errno) << std::endl;
+		server({ localhost, 3333 });
+	}
+	else
+		client(localhost, { localhost, 3333 });
+}
+
+int main(int argc, char **argv) {
+	adhoc();
 	return 0;
 }

@@ -11,5 +11,5 @@ include_directories(${PROJECT_SOURCE_DIR}/thirdparty/lodepng)
 include_directories(${PROJECT_SOURCE_DIR}/thirdparty/pixeltoaster)
 add_subdirectory(${PROJECT_SOURCE_DIR}/thirdparty/pixeltoaster)
 
-add_executable(Onder src/main.cpp src/filesystem.cpp src/graphics.cpp src/world.cpp thirdparty/lodepng/lodepng.cpp)
+add_executable(Onder src/main.cpp src/filesystem.cpp src/graphics.cpp src/net.cpp src/world.cpp src/multiplayer/client.cpp src/multiplayer/server.cpp thirdparty/lodepng/lodepng.cpp)
 target_link_libraries(Onder PixelToaster)

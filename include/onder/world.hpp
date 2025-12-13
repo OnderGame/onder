@@ -11,6 +11,11 @@ struct TileId {
 	uint32_t id;
 
 	TileId() : id(0) {}
+	TileId(uint32_t id) : id(id) {}
+
+	bool is_valid() const {
+		return id != (uint32_t)-1;
+	}
 };
 
 // 2**5 * 2**5 * 4 = 2**10 * 4 = 4096 = one page
@@ -30,7 +35,7 @@ template<typename T>
 using ChunkGrid = collections::Array<collections::Array<T, CHUNK_DIM>, CHUNK_DIM>;
 
 struct Chunk {
-	 ChunkGrid<TileId> tiles; // 2**5
+	ChunkGrid<TileId> tiles; // 2**5
 };
 
 struct ChunkRef {
@@ -47,11 +52,11 @@ struct ChunkRef {
 		return offset_count != -1;
 	}
 
-	uint32_t offset() {
+	uint32_t offset() const {
 		return offset_count >> 12;
 	}
 
-	uint32_t count() {
+	uint32_t count() const {
 		return offset_count & ((1U << 12) - 1);
 	}
 };
@@ -86,6 +91,7 @@ public:
 
 	void free(ChunkRef ref);
 
+	const ChunkSlot *get(const ChunkRef index) const;
 	ChunkSlot &get_or_alloc(ChunkRef &index);
 
 	ChunkSlot &operator[](ChunkRef index);
@@ -94,10 +100,22 @@ public:
 class World {
 	collections::List<ChunkRoot> layers;
 	ChunkCollection chunks;
+	// equal to the size - 1,
+	// and the size is a power of 2.
+	uint32_t layer_wrap_mask;
+
+	const Chunk *chunk(uint8_t depth, uint32_t cx, uint32_t cy) const;
+
+	World(const World &) = delete;
+	World &operator=(const World &) = delete;
 
 public:
-	World(size_t depth);
+	// layer_size_p2 = log2(layer_size)
+	World(size_t depth, uint8_t layer_size_p2);
 
+	Chunk &chunk(uint8_t depth, uint32_t cx, uint32_t cy);
+
+	const TileId operator[](uint8_t depth, uint32_t x, uint32_t y) const;
 	TileId &operator[](uint8_t depth, uint32_t x, uint32_t y);
 };
 

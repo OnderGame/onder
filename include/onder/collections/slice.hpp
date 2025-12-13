@@ -20,11 +20,11 @@ class Slice {
 public:
 	// https://stackoverflow.com/a/38103394
 	class iterator {
-		T *cur, *start, *end;
+		T *cur;
 
 		friend class Slice;
 
-		iterator(T *cur, T *start, T *end) : cur(cur), start(start), end(end) {}
+		iterator(T *cur) : cur(cur) {}
 
 	public:
 		iterator& operator++() {
@@ -73,11 +73,23 @@ public:
 	}
 
 	iterator begin() const {
-		return { base, base, base + m_len };
+		return { base };
 	}
 
 	iterator end() const {
-		return { base + m_len, base, base + m_len };
+		return { base + m_len };
+	}
+
+	Slice<T> slice(size_t from, size_t until) {
+		if (from > until)
+			throw std::exception();
+		if (until > len())
+			throw std::exception();
+		return { base + from, until - from };
+	}
+
+	operator Slice<const T>() {
+		return { base, m_len };
 	}
 };
 
