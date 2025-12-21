@@ -7,6 +7,35 @@ using namespace onder::math;
 namespace onder {
 namespace graphics {
 
+Image::Image(math::Vec2<uint16_t> dim) : m_data(nullptr), m_dim(dim) {
+	m_data = new Pixel[area()];
+}
+
+Image::~Image() {
+	delete[] m_data;
+}
+
+Image::Image(Image &&src) : m_data(src.m_data), m_dim(src.m_dim) {
+	src.m_dim = {};
+	src.m_data = nullptr;
+}
+Image &Image::operator=(Image &&src) {
+	this->~Image();
+	m_dim = src.m_dim;
+	m_data = src.m_data;
+	src.m_dim = {};
+	src.m_data = nullptr;
+	return *this;
+}
+
+const Pixel *Image::row(uint16_t y) const {
+	return m_data + (m_dim.x * y);
+}
+
+Pixel *Image::row(uint16_t y) {
+	return m_data + (m_dim.x * y);
+}
+
 Image Image::filled(Vec2<uint16_t> dim, Pixel value) {
 	Image img(dim);
 	img.fill(value);
@@ -23,8 +52,14 @@ Image Image::from_png(collections::Slice<const uint8_t> data) {
 	auto w = (uint16_t)width, h = (uint16_t)height;
 	if (width != w || height != h)
 		throw std::exception();
-	// FIXME free() isn't compatible with delete[]
-	return { (Pixel *)out, { w, h } };
+	// LodePNG uses malloc/free/realloc internally, which isn't compatible with new/delete
+	// We can easily substitute malloc/free, but replacing realloc requires knowing the old size,
+	// which we don't have.
+	// The easiest fix is to simply copy. What can you do?
+	Pixel *newout = new Pixel[(size_t)w * h];
+	::memcpy((void *)newout, (void *)out, (size_t)w * h * 4);
+	free(out);
+	return { newout, { w, h } };
 }
 
 void Image::copy_from(const Image &src, Rect<uint16_t> from, Vec2<uint16_t> to) {
@@ -41,8 +76,17 @@ void Image::copy_from(const Image &src, Rect<uint16_t> from, Vec2<uint16_t> to) 
 	}
 }
 
+void Image::fill(Pixel value) {
+	for (size_t i = 0; i < area(); i++)
+		m_data[i] = value;
+}
+
 Vec2<uint16_t> Image::dim() const {
 	return m_dim;
+}
+
+const Pixel *Image::data() const {
+	return m_data;
 }
 
 uint32_t Image::area() const {
